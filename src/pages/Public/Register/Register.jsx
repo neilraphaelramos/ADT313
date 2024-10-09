@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import './Register.css';
 import { useNavigate } from 'react-router-dom';
-import { useDebounce } from '../../../utils/hooks/useDebounce';
+import { useDebounce } from '../../../utils/hooks/useDebounce'
+import './Register.css'
 import axios from 'axios';
 
 function Register() {
