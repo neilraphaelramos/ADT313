@@ -21,7 +21,7 @@ function Main() {
   }, []);
   return (
     <div className='Main'>
-      <div className='container'>
+      <div className='custom-container'>
         <div className='navigation'>
           <ul>
             <li>
