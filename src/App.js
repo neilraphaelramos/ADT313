@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import './index.css';
+import './App.css';
 import Login from './pages/Public/Login/Login';
 import Dashboard from './pages/Main/Dashboard/Dashboard';
 import Main from './pages/Main/Main';
@@ -14,6 +14,14 @@ const router = createBrowserRouter([
   },
   {
     path: '/register',
+    element: <Register />,
+  },
+  {
+    path: 'adminmode/login',
+    element: <Login />,
+  },
+  {
+    path: 'adminmode/register',
     element: <Register />,
   },
   {
