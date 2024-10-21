@@ -66,7 +66,7 @@ function Login() {
         setIsError(false);
         setAlertMessage(res.data.message);
         setTimeout(() => {
-          navigate('/main/dashboard');
+          navigate('/main/movies');
           setStatus('idle');
         }, 3000);
       })
