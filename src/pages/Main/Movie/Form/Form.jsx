@@ -1,96 +1,130 @@
 import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const Form = () => {
     const [query, setQuery] = useState('');
     const [searchedMovieList, setSearchedMovieList] = useState([]);
     const [selectedMovie, setSelectedMovie] = useState(undefined);
     const [movie, setMovie] = useState(undefined);
-    const [notfound, setnotFound] = useState(false);
+    const [notfound, setNotFound] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [pagebtn, setPageBtn] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null); // Error state for displaying error messages
     const navigate = useNavigate();
     let { movieId } = useParams();
 
-    const handleSearch = useCallback(() => {
-        axios({
-            method: 'get',
-            url: `https://api.themoviedb.org/3/search/movie?query=${query}&include_adult=false&language=en-US&page=1`,
-            headers: {
-                Accept: 'application/json',
-                Authorization:
-                    'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5YTdiNmUyNGJkNWRkNjhiNmE1ZWFjZjgyNWY3NGY5ZCIsIm5iZiI6MTcyOTI5NzI5Ny4wNzMzNTEsInN1YiI6IjY2MzhlZGM0MmZhZjRkMDEzMGM2NzM3NyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.ZIX4EF2yAKl6NwhcmhZucxSQi1rJDZiGG80tDd6_9XI',
-            },
-        }).then((response) => {
+    const handleSearch = useCallback(async (page = 1) => {
+        setIsLoading(true);
+        setError(null); // Reset error state before the search
+        try {
+            const response = await axios({
+                method: 'get',
+                url: `https://api.themoviedb.org/3/search/movie?query=${query}&include_adult=false&language=en-US&page=${page}`,
+                headers: {
+                    Accept: 'application/json',
+                    Authorization: 'Bearer YOUR_API_KEY_HERE',
+                },
+            });
+
             if (response.data.results.length === 0) {
                 console.log("Not Found");
-                setnotFound(true)
+                setNotFound(true);
+                setSearchedMovieList([]);
+                setTotalPages(0);
+                setPageBtn(false);
             } else {
                 setSearchedMovieList(response.data.results);
-                console.log("Movies Found");
-                console.log(response.data.results);
-                setnotFound(false)
+                setTotalPages(response.data.total_pages);
+                setNotFound(false);
+                setPageBtn(true);
             }
-
-        });
+        } catch (err) {
+            setError('Error fetching movies. Please try again later.'); 
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
     }, [query]);
 
     const handleSelectMovie = (movie) => {
         setSelectedMovie(movie);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const accessToken = localStorage.getItem('accessToken');
-        console.log(accessToken);
-        if (selectedMovie === undefined) {
-            //add validation
+        if (!selectedMovie) {
             alert('Please search and select a movie.');
-        } else {
-            const data = {
-                tmdbId: selectedMovie.id,
-                title: selectedMovie.title,
-                overview: selectedMovie.overview,
-                popularity: selectedMovie.popularity,
-                releaseDate: selectedMovie.release_date,
-                voteAverage: selectedMovie.vote_average,
-                backdropPath: `https://image.tmdb.org/t/p/original/${selectedMovie.backdrop_path}`,
-                posterPath: `https://image.tmdb.org/t/p/original/${selectedMovie.poster_path}`,
-                isFeatured: 0,
-            };
+            return;
+        }
 
-            const request = axios({
-                method: 'post',
-                url: '/movies',
-                data: data,
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            })
-                .then((saveResponse) => {
-                    console.log(saveResponse);
-                    alert('Save Success');
-                    navigate('/main/movies');
-                })
-                .catch((error) => console.log(error));
+        const data = {
+            tmdbId: selectedMovie.id,
+            title: selectedMovie.title,
+            overview: selectedMovie.overview,
+            popularity: selectedMovie.popularity,
+            releaseDate: selectedMovie.release_date,
+            voteAverage: selectedMovie.vote_average,
+            backdropPath: `https://image.tmdb.org/t/p/original/${selectedMovie.backdrop_path}`,
+            posterPath: `https://image.tmdb.org/t/p/original/${selectedMovie.poster_path}`,
+            isFeatured: 0,
+        };
+
+        try {
+            if (movieId) {
+                // Update existing movie
+                await axios({
+                    method: 'PATCH',
+                    url: `/movies/${movieId}`,
+                    data: data,
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+                alert('Update Success');
+            } else {
+                // Create new movie
+                await axios({
+                    method: 'post',
+                    url: '/movies',
+                    data: data,
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+                alert('Save Success');
+            }
+            navigate('/main/movies');
+        } catch (err) {
+            setError('Error saving movie. Please try again later.'); 
+            console.error(err);
         }
     };
 
     useEffect(() => {
         if (movieId) {
-            axios.get(`/movies/${movieId}`).then((response) => {
-                setMovie(response.data);
-                const tempData = {
-                    id: response.data.tmdbId,
-                    original_title: response.data.title,
-                    overview: response.data.overview,
-                    popularity: response.data.popularity,
-                    poster_path: response.data.posterPath,
-                    release_date: response.data.releaseDate,
-                    vote_average: response.data.voteAverage,
-                };
-                setSelectedMovie(tempData);
-                console.log(response.data);
-            });
+            const fetchMovie = async () => {
+                try {
+                    const response = await axios.get(`/movies/${movieId}`);
+                    setMovie(response.data);
+                    setSelectedMovie({
+                        id: response.data.tmdbId,
+                        title: response.data.title,
+                        overview: response.data.overview,
+                        popularity: response.data.popularity,
+                        poster_path: response.data.posterPath,
+                        release_date: response.data.releaseDate,
+                        vote_average: response.data.voteAverage,
+                    });
+                } catch (err) {
+                    setError('Error fetching movie details. Please try again later.'); 
+                    console.error(err);
+                }
+            };
+
+            fetchMovie();
         }
     }, [movieId]);
 
@@ -104,30 +138,39 @@ const Form = () => {
                 msOverflowStyle: 'none',
             }}
         >
-            <h1>{movieId !== undefined ? 'Edit ' : 'Create '} Movie</h1>
+            <h1>{movieId ? 'Edit ' : 'Create '} Movie</h1>
+
+            {error && <p className="text-center text-danger">{error}</p>} {/* Display error messages */}
 
             {movieId === undefined && (
                 <>
                     <div className="search-container">
                         <div className="form-group">
-                            <label>Search Movie</label>
+                            <label>Search Movie: {" "}</label>
                             <div className="d-flex">
                                 <input
                                     type="text"
                                     className="form-control me-2"
-                                    onChange={(event) => setQuery(event.target.value)}
+                                    onChange={(event) => {
+                                        setQuery(event.target.value);
+                                        setNotFound(false);
+                                        setSearchedMovieList([]);
+                                        setSelectedMovie(undefined);
+                                        setCurrentPage(1);
+                                        setPageBtn(false);
+                                    }}
+                                    placeholder='Enter movie title'
                                 />
                                 <button
                                     type="button"
                                     className="btn btn-primary"
-                                    onClick={handleSearch}
+                                    onClick={() => handleSearch(1)}
                                 >
                                     Search
                                 </button>
                             </div>
                         </div>
 
-                        {/* Search Results Container with Scroll */}
                         <div
                             className="searched-movie mt-3 overflow-auto"
                             style={{
@@ -138,8 +181,12 @@ const Form = () => {
                                 msOverflowStyle: 'none',
                             }}
                         >
-                            {notfound === true ? (
-                                <p className="text-center text-muted" >Movie not found</p>
+                            {notfound ? (
+                                <p className="text-center text-white bg-danger p-2 rounded" style={{ opacity: 0.6 }}>
+                                    Movie not found
+                                </p>
+                            ) : isLoading ? (
+                                <p className="text-center">Searching...</p>
                             ) : (
                                 searchedMovieList.map((movie) => (
                                     <p
@@ -153,23 +200,54 @@ const Form = () => {
                             )}
                         </div>
                     </div>
+
+                    {/* Pagination Controls */}
+                    {totalPages > 0 && !notfound && pagebtn && (
+                        <div className="mt-3 d-flex justify-content-center">
+                            <button
+                                className="btn btn-secondary me-2"
+                                onClick={() => {
+                                    if (currentPage > 1) {
+                                        handleSearch(currentPage - 1);
+                                        setCurrentPage(currentPage - 1);
+                                    }
+                                }}
+                                disabled={currentPage === 1}
+                            >
+                                Previous
+                            </button>
+                            <span className="align-self-center">Page {currentPage} of {totalPages}</span>
+                            <button
+                                className="btn btn-secondary ms-2"
+                                onClick={() => {
+                                    if (currentPage < totalPages) {
+                                        handleSearch(currentPage + 1);
+                                        setCurrentPage(currentPage + 1);
+                                    }
+                                }}
+                                disabled={currentPage === totalPages}
+                            >
+                                Next
+                            </button>
+                        </div>
+                    )}
                     <hr />
                 </>
             )}
 
             <div className="row">
-                {/* Column for the image */}
                 <div className="col-md-6 border">
                     {selectedMovie && (
-                        <img
-                            className="img-fluid mb-3"
-                            src={`https://image.tmdb.org/t/p/original/${selectedMovie.poster_path}`}
-                            alt={selectedMovie.original_title}
-                        />
+                        <>
+                            <img
+                                className="img-fluid mb-3"
+                                src={`https://image.tmdb.org/t/p/original/${selectedMovie.poster_path}`}
+                                alt={selectedMovie.title}
+                            />
+                        </>
                     )}
                 </div>
 
-                {/* Column for the form */}
                 <div className="col-md-5">
                     <form>
                         <div className="form-group">
@@ -177,8 +255,9 @@ const Form = () => {
                             <input
                                 type="text"
                                 className="form-control"
-                                value={selectedMovie ? selectedMovie.original_title : ''}
-                                readOnly
+                                value={selectedMovie ? selectedMovie.title : ''}
+                                onChange={(e) => setSelectedMovie({ ...selectedMovie, title: e.target.value })}
+                                disabled={movieId === undefined}
                             />
                         </div>
 
@@ -188,47 +267,56 @@ const Form = () => {
                                 className="form-control"
                                 rows={5}
                                 value={selectedMovie ? selectedMovie.overview : ''}
-                                readOnly
+                                onChange={(e) => setSelectedMovie({ ...selectedMovie, overview: e.target.value })}
+                                disabled={movieId === undefined}
                             />
                         </div>
 
                         <div className="form-group">
                             <label>Popularity</label>
                             <input
-                                type="text"
+                                type="number"
                                 className="form-control"
                                 value={selectedMovie ? selectedMovie.popularity : ''}
-                                readOnly
+                                onChange={(e) => setSelectedMovie({ ...selectedMovie, popularity: e.target.value })}
+                                step={0.1}
+                                disabled={movieId === undefined}
                             />
                         </div>
 
                         <div className="form-group">
                             <label>Release Date</label>
                             <input
-                                type="text"
+                                type="date"
                                 className="form-control"
                                 value={selectedMovie ? selectedMovie.release_date : ''}
-                                readOnly
+                                onChange={(e) => setSelectedMovie({ ...selectedMovie, release_date: e.target.value })}
+                                disabled={movieId === undefined}
                             />
                         </div>
 
                         <div className="form-group">
                             <label>Vote Average</label>
                             <input
-                                type="text"
+                                type="number"
                                 className="form-control"
                                 value={selectedMovie ? selectedMovie.vote_average : ''}
-                                readOnly
+                                onChange={(e) => setSelectedMovie({ ...selectedMovie, vote_average: e.target.value })}
+                                step={0.1}
+                                disabled={movieId === undefined}
                             />
                         </div>
 
-                        <button
-                            type="button"
-                            className="btn btn-success mt-3"
-                            onClick={handleSave}
-                        >
-                            Save
-                        </button>
+                        <div className="form-group">
+                            <button
+                                type="button"
+                                className="btn btn-success"
+                                onClick={handleSave}
+                                disabled={!selectedMovie}
+                            >
+                                {movieId ? 'Update' : 'Save'}
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
