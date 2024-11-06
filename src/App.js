@@ -32,6 +32,10 @@ const router = createBrowserRouter([
     element: <Main />,
     children: [
       {
+        path: '/main/dashboard',
+        element: <Dashboard />
+      },
+      {
         path: '/main/movies',
         element: <Movie />,
         children: [
@@ -43,7 +47,7 @@ const router = createBrowserRouter([
             element: <Form />,
           },
         ]
-      }
+      },
      // {
      //   path: '/main/dashboard',
      //   element: <Dashboard />,

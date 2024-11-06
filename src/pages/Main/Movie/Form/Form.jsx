@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
+
 const Form = () => {
     const [query, setQuery] = useState('');
     const [searchedMovieList, setSearchedMovieList] = useState([]);
@@ -42,7 +43,7 @@ const Form = () => {
                 setPageBtn(true);
             }
         } catch (err) {
-            setError('Error fetching movies. Please try again later.'); 
+            setError('Error fetching movies. Please try again later.');
             console.error(err);
         } finally {
             setIsLoading(false);
@@ -98,7 +99,7 @@ const Form = () => {
             }
             navigate('/main/movies');
         } catch (err) {
-            setError('Error saving movie. Please try again later.'); 
+            setError('Error saving movie. Please try again later.');
             console.error(err);
         }
     };
@@ -119,7 +120,7 @@ const Form = () => {
                         vote_average: response.data.voteAverage,
                     });
                 } catch (err) {
-                    setError('Error fetching movie details. Please try again later.'); 
+                    setError('Error fetching movie details. Please try again later.');
                     console.error(err);
                 }
             };
@@ -129,7 +130,7 @@ const Form = () => {
     }, [movieId]);
 
     return (
-        <div className="container mt-5 overflow-auto"
+        <div className="overflow-auto"
             style={{
                 maxHeight: '80vh',
                 overflowX: 'hidden',
@@ -138,13 +139,13 @@ const Form = () => {
                 msOverflowStyle: 'none',
             }}
         >
-            <h1>{movieId ? 'Edit ' : 'Create '} Movie</h1>
+            <h2>{movieId ? 'Edit ' : 'Adding '} Movie</h2>
 
             {error && <p className="text-center text-danger">{error}</p>} {/* Display error messages */}
 
             {movieId === undefined && (
                 <>
-                    <div className="search-container">
+                    <div className="search-container mt-3">
                         <div className="form-group">
                             <label>Search Movie: {" "}</label>
                             <div className="d-flex">
@@ -235,17 +236,18 @@ const Form = () => {
                 </>
             )}
 
-            <div className="row">
-                <div className="col-md-6 border">
-                    {selectedMovie && (
-                        <>
-                            <img
-                                className="img-fluid mb-3"
-                                src={`https://image.tmdb.org/t/p/original/${selectedMovie.poster_path}`}
-                                alt={selectedMovie.title}
-                            />
-                        </>
-                    )}
+            <div className="row justify-content-center">
+                <div className="col-md-5 border d-flex justify-content-center"
+                    style={{ maxHeight: "500px", maxWidth: "320px" }}
+                >
+                    <img
+                        className="img-fluid"
+                        src={selectedMovie?.poster_path
+                            ? `https://image.tmdb.org/t/p/original/${selectedMovie.poster_path}`
+                            : require('./../../../../utils/images/cinematography-symbols-black-background.jpg')}
+                        alt={selectedMovie?.title || 'Fallback Cinematography Symbol'}
+                        style={{ maxHeight: "500px", maxWidth: "318px" }}
+                    />
                 </div>
 
                 <div className="col-md-5">
@@ -307,7 +309,7 @@ const Form = () => {
                             />
                         </div>
 
-                        <div className="form-group">
+                        <div className="form-group mt-2">
                             <button
                                 type="button"
                                 className="btn btn-success"

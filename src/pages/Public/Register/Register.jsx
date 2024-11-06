@@ -75,7 +75,7 @@ function Register() {
       .then((res) => {
         console.log(res);
         localStorage.setItem('accessToken', res.data.access_token);
-  
+
         // Show the alert message
         setIsError(false);
         setAlertMessage(res.data.message);
@@ -87,13 +87,13 @@ function Register() {
       .catch((e) => {
         console.log(e);
         setStatus('idle');
-  
+
         // Show the alert message for account existence or other errors
         setIsError(true);
         setAlertMessage(e.response?.data?.message || e.message);
         setTimeout(() => setAlertMessage(''), 3000);
       });
-  };  
+  };
 
   useEffect(() => {
     setDebounceState(true);
@@ -101,14 +101,19 @@ function Register() {
 
   return (
     <div className='d-flex justify-content-center align-items-center color-page' style={{ height: '100vh' }}>
-      <div className='p-4 bg-white w-25 rounded shadow'>
+      <div className='p-4 w-25 rounded shadow'
+        style={{
+          background: 'rgba(255, 255, 255, 0.6)',
+          backdropFilter: 'blur(10px)'
+        }}
+      >
         {alertMessage && (
           <div className={`text-center  alert ${isError ? 'alert-danger' : 'alert-success'}`} role="alert">
             {alertMessage}
           </div>
         )}
         <div>
-          <h3 className="text-center">Welcome to Movie Web App!</h3>
+          <h3 className="text-center"><strong>Welcome to Movie Web App!</strong></h3>
           <p className="text-center">Sign up to unlock the movies, reviews and discover a new content!</p>
           <form>
             <div className="form-group mb-3">

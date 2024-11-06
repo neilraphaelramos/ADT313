@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import './Lists.css'; // Import the CSS file
 
 const Lists = () => {
     const accessToken = localStorage.getItem('accessToken');
@@ -45,12 +46,12 @@ const Lists = () => {
     };
 
     return (
-        <div className='container mt-5'>
-            <div className='d-flex justify-content-between mb-3'>
-                <h2>Movie List</h2>
+        <div className="bg-custom text-light">
+            <div className="d-flex justify-content-between">
+                <h2>List of Movies</h2>
                 <button
-                    type='button'
-                    className='btn btn-primary'
+                    type="button"
+                    className="btn btn-primary"
                     onClick={() => {
                         navigate('/main/movies/form');
                     }}
@@ -58,14 +59,14 @@ const Lists = () => {
                     Create new
                 </button>
             </div>
-
-            <div className='table-responsive'>
-                <table className='table table-striped table-bordered'>
-                    <thead className='thead-dark'>
+            <div className="table-responsive mt-3 rounded">
+                <table>
+                    <thead>
                         <tr>
                             <th>No.</th>
                             <th>ID</th>
                             <th>Title</th>
+                            <th>Popularity</th>
                             <th>Release Date</th>
                             <th>Actions</th>
                         </tr>
@@ -76,11 +77,12 @@ const Lists = () => {
                                 <td>{index + 1}</td>
                                 <td>{movie.id}</td>
                                 <td>{movie.title}</td>
+                                <td>{movie.popularity}</td>
                                 <td>{movie.releaseDate}</td>
                                 <td>
                                     <button
-                                        type='button'
-                                        className='btn btn-warning btn-sm mr-2'
+                                        type="button"
+                                        className="btn btn-warning btn-sm me-2"
                                         onClick={() => {
                                             navigate('/main/movies/form/' + movie.id);
                                         }}
@@ -88,8 +90,8 @@ const Lists = () => {
                                         Edit
                                     </button>
                                     <button
-                                        type='button'
-                                        className='btn btn-danger btn-sm ms-2'
+                                        type="button"
+                                        className="btn btn-danger btn-sm ms-2"
                                         onClick={() => handleDelete(movie.id)}
                                     >
                                         Delete

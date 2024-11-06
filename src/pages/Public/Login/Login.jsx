@@ -63,10 +63,11 @@ function Login() {
       .then((res) => {
         console.log(res);
         localStorage.setItem('accessToken', res.data.access_token);
+        localStorage.setItem('user' , JSON.stringify(res.data.user));
         setIsError(false);
         setAlertMessage(res.data.message);
         setTimeout(() => {
-          navigate('/main/movies');
+          navigate('/main/dashboard');
           setStatus('idle');
         }, 3000);
       })
@@ -88,13 +89,18 @@ function Login() {
   return (
     <div>
       <div className='d-flex justify-content-center align-items-center color-page' style={{ height: '100vh' }}>
-        <div className='p-4 bg-white w-25 rounded shadow'>
+        <div className='p-4 w-25 rounded shadow'
+          style={{
+          background: 'rgba(255, 255, 255, 0.6)',
+          backdropFilter: 'blur(10px)'
+        }}
+        >
         {alertMessage && (
           <div className={`text-center  alert ${isError ? 'alert-danger' : 'alert-success'}`} role="alert">
             {alertMessage}
           </div>
         )}
-          <h1 className="text-center mb-3">Welcome to Movie Web App!</h1>
+          <h1 className="text-center mb-3"><strong>Welcome to Movie Web App!</strong></h1>
           <p className="text-center">Unlock the magic of cinema. Explore, discover, and immerse yourself in a world of movies like never before.</p>
           <form>
             <div className="form-group mb-3">
