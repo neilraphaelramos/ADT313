@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import './Lists.css'; // Import the CSS file
+import './Lists.css'; 
 
 const Lists = () => {
     const accessToken = localStorage.getItem('accessToken');

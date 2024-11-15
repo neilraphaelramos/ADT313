@@ -9,6 +9,9 @@ import Register from './pages/Public/Register/Register';
 import Movie from './pages/Main/Movie/Movie';
 import Lists from './pages/Main/Movie/Lists/Lists';
 import Form from './pages/Main/Movie/Form/Form';
+import CastForm from './pages/Main/Movie/Cast-and-Crew/Cast-Form';
+import PhotoForm from './pages/Main/Movie/Photos/Photo-Form';
+import VideoForm from './pages/Main/Movie/Videos/Video-Form';
 
 const router = createBrowserRouter([
   {
@@ -42,17 +45,36 @@ const router = createBrowserRouter([
           {
             path: '/main/movies',
             element: <Lists />,
-          },{
+          },
+          {
             path: '/main/movies/form/:movieId?',
             element: <Form />,
+            children: [
+              {
+                path: '/main/movies/form/:movieId',
+                element: <CastForm />
+              },
+              {
+                path: '/main/movies/form/:movieId/cast-and-crews',
+                element: <CastForm />
+              },
+              {
+                path: '/main/movies/form/:movieId/photos',
+                element: <PhotoForm />
+              },
+              {
+                path: '/main/movies/form/:movieId/videos',
+                element: <VideoForm />
+              },
+            ]
           },
         ]
       },
-     // {
-     //   path: '/main/dashboard',
-     //   element: <Dashboard />,
-     // },
-     
+      // {
+      //   path: '/main/dashboard',
+      //   element: <Dashboard />,
+      // },
+
     ],
   },
 ]);
