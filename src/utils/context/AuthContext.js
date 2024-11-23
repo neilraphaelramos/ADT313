@@ -21,11 +21,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const [movie, setMovie] = useState(null);
+  const [lists, setLists] = useState([]);
 
   const setMovieInfo = (movieInfo) => {
     setMovie(movieInfo);
-    console.log(movieInfo)
+    console.log(movieInfo);
   };
+
+  const setListDataMovie = (listData) => {
+    setLists(listData);
+    console.log(listData);
+  }
 
   const clearAuthData = () => {
     setAuth({
@@ -34,6 +40,7 @@ export const AuthProvider = ({ children }) => {
     });
 
     setMovie(null);
+    setLists([]);
 
     // Remove from localStorage
     localStorage.removeItem('accessToken');
@@ -42,7 +49,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ auth, setAuthData, clearAuthData, movie, setMovieInfo }}>
+    <AuthContext.Provider value={{ auth, setAuthData, clearAuthData, movie, setMovieInfo, lists, setListDataMovie }}>
       {children}
     </AuthContext.Provider>
   );
