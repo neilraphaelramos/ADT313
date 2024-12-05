@@ -17,8 +17,7 @@ body {
 .list-container {
   display: flex;
   flex-wrap: wrap;
-  height: auto;
-  max-height: 100vh;
+  height: 100vh;
   flex: 1;
   gap: 1rem;
   overflow-x: hidden;

@@ -43,10 +43,6 @@ const router = createBrowserRouter([
     element: <ForgotPassword />
   },
   {
-    path: '/admin/reset-password',
-    element: <ForgotPassword />
-  },
-  {
     path: '/main',
     element: <Main />,
     children: [

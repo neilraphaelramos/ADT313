@@ -20,14 +20,6 @@ function ForgotPassword() {
   const [alertMessage, setAlertMessage] = useState('');
   const [status, setStatus] = useState('idle');
 
-  let apiEndpoint;
-
-  if (window.location.pathname.includes('/admin')) {
-    apiEndpoint = '/admin/login';
-  } else {
-    apiEndpoint = '/user/resetpass';
-  };
-
   const handleOnChange = (event, type) => {
     setDebounceState(false);
     setIsFieldsDirty(true);
@@ -75,7 +67,7 @@ function ForgotPassword() {
 
       await axios({
         method: 'patch',
-        url: apiEndpoint,
+        url: '/user/resetpass',
         data,
         headers: { 'Access-Control-Allow-Origin': '*' },
       }).then((response) => {
